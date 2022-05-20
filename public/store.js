@@ -33,6 +33,43 @@ var stripeHandler = StripeCheckout.configure({
     token: function(token) {
         //log token response from stripe w/ credit card details and token id to charge users
         console.log(token);
+
+        //calculate total price
+        //initialize empty array
+        var items = [];
+        //get cart item container
+        var cartItemContainer = document.getElementsByClassName('cart-items')[0];
+        //get elements for each row in the cart on page
+        var cartRows = cartItemContainer.getElementsByClassName('cart-row');
+        //loop through each cart line
+        for (var i = 0; i<cartRows.length; i++) {
+            //loop through each cart item to get row
+            var cartRow = cartRows[i];
+            //get quantity of item
+            var quantityElement = cartRow.getElementsByClassName('cart-quantity-input')[0];
+            var quantity = quantityElement.value;
+            //get id of item
+            var id = cartRow.dataset.itemId;
+            //add ids and quantity of each to the items array to send to shopify to process payment
+            items.push({
+                id: id,
+                quantity: quantity
+            })
+
+        }
+
+        //send post request of JSON items data to Stripe with unique token id per transaction
+        fetch('/purchase', {
+            method: POST,
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                stripeTokenId: token.id,
+                items: items
+            })
+        })
     }
 })
 
@@ -74,13 +111,15 @@ function addToCartClicked(event) {
     var title = shopItem.getElementsByClassName('shop-item-title')[0].innerText
     var price = shopItem.getElementsByClassName('shop-item-price')[0].innerText
     var imageSrc = shopItem.getElementsByClassName('shop-item-image')[0].src
-    addItemToCart(title, price, imageSrc)
+    var id = shopItem.dataset.itemId
+    addItemToCart(title, price, imageSrc, id)
     updateCartTotal()
 }
 
-function addItemToCart(title, price, imageSrc) {
+function addItemToCart(title, price, imageSrc, id) {
     var cartRow = document.createElement('div')
     cartRow.classList.add('cart-row')
+    cartRow.dataset.itemId=id
     var cartItems = document.getElementsByClassName('cart-items')[0]
     var cartItemNames = cartItems.getElementsByClassName('cart-item-title')
     for (var i = 0; i < cartItemNames.length; i++) {
