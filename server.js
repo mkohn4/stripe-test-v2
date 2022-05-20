@@ -29,7 +29,9 @@ app.get('/store', function(req,res) {
         //using store.ejs instead of store.html to use template
         res.render('store.ejs', {
             //send json to HTML template
-            items: JSON.parse(data)
+            items: JSON.parse(data),
+            //send stripe public key
+            stripePublishableKey: stripePublishableKey
         });
         }
     })

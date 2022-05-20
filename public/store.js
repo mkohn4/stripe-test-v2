@@ -26,13 +26,32 @@ function ready() {
     document.getElementsByClassName('btn-purchase')[0].addEventListener('click', purchaseClicked)
 }
 
+//handle stripe checkout
+var stripeHandler = StripeCheckout.configure({
+    key: stripePublicKey,
+    locale: 'auto',
+    token: function(token) {
+        //log token response from stripe w/ credit card details and token id to charge users
+        console.log(token);
+    }
+})
+
+//add items to cart
 function purchaseClicked() {
-    alert('Thank you for your purchase')
+   /* alert('Thank you for your purchase')
     var cartItems = document.getElementsByClassName('cart-items')[0]
     while (cartItems.hasChildNodes()) {
         cartItems.removeChild(cartItems.firstChild)
     }
-    updateCartTotal()
+    updateCartTotal()*/
+
+    //get price from html by class
+    var priceElement = document.getElementsByClassName('cart-total-price')[0];
+    //get stripe configured price by converting to float, remove $, and multiply by 100
+    var price = parseFloat(priceElement.innerText.replace('$', '')) * 100
+    stripeHandler.open({
+        amount: price
+    })
 }
 
 function removeCartItem(event) {
