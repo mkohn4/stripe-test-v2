@@ -1,7 +1,7 @@
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config()
 }
-
+//add secret keys via .env
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
 const stripePublishableKey = process.env.PUBLISHABLE_KEY
 
@@ -15,6 +15,23 @@ const app = express();
 app.set('view engine', 'ejs');
 //static html files live in public folder
 app.use(express.static('public'))
+
+
+//add get route for store
+app.get('/store', function(req,res) {
+    FileSystem.readFile('items.json', function(err, data) {
+    if (err) {
+        //if err send 500 error code
+        res.status(500).end()
+    } else {
+        //else render store.ejs by parsing JSON from items.json
+        //using store.ejs instead of store.html to use template
+        res.render('store.ejs', {
+            items: JSON.parse(data)
+        });
+        }
+    })
+});
 
 //start server
 app.listen(3000);
