@@ -60,7 +60,7 @@ var stripeHandler = StripeCheckout.configure({
 
         //send post request of JSON items data to Stripe with unique token id per transaction
         fetch('/purchase', {
-            method: POST,
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
@@ -69,18 +69,25 @@ var stripeHandler = StripeCheckout.configure({
                 stripeTokenId: token.id,
                 items: items
             })
-        })
+        }).then(function(res) {
+            //if successful response, return JSON response
+            return res.json();
+        }).then(function(data) {
+            //alert user with server side response messgae
+            alert(data.message);
+            //remove items from cart
+            var cartItems = document.getElementsByClassName('cart-items')[0]
+            while (cartItems.hasChildNodes()) {
+                cartItems.removeChild(cartItems.firstChild)
+            }
+            updateCartTotal()
+            //catch error and log to console
+        }).catch(err => console.log(err));
     }
 })
 
 //add items to cart
 function purchaseClicked() {
-   /* alert('Thank you for your purchase')
-    var cartItems = document.getElementsByClassName('cart-items')[0]
-    while (cartItems.hasChildNodes()) {
-        cartItems.removeChild(cartItems.firstChild)
-    }
-    updateCartTotal()*/
 
     //get price from html by class
     var priceElement = document.getElementsByClassName('cart-total-price')[0];
